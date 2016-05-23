@@ -1,5 +1,6 @@
 #!/usr/bin/env python
-
+import sys
+sys.path.append('../db_data/')
 import h5py
 import hdf5_getters as getter
 import os
@@ -10,7 +11,7 @@ def getInfo(files, songs):
     infoList = np.array(['tid', 'artist', 'song'])
     # Checks to see db song is in out subset, then adds it
     # Not the most efficient method
-    
+    infoList = np.zeros(18)
     for fil in files:
         for song in songs:
             if fil.split('/')[-1].split('.')[0] == song[1].split('/')[-1].split('.')[0]:
@@ -19,7 +20,7 @@ def getInfo(files, songs):
                 curArtist = getter.get_artist_name(curFile)
                 curTitle = getter.get_title(curFile)
                 curArr = np.array([tid, curArtist, curTitle])
-                infoList = np.vstack([infoList, curArr])
+                infoList = np.vstack([infoList, np.hstack([curArr, song[2:]])])
                 curFile.close()
 
     return infoList
@@ -39,11 +40,11 @@ def main():
     # Get array of song tid, artick, track and save it
     infos = getInfo(files, songs)
     saveData('trackInfo', infos)
-
+    '''
     # Open topic model data, combine it to song info and save
     topicData = np.genfromtxt('song_topic_data.txt', dtype=str)
     allData = connectData(infos, topicData)
     saveData('cleanTopicData', allData)
-
+    '''
 if __name__=='__main__':
     main()
