@@ -10,9 +10,10 @@ def getInfo(files, songs):
     infoList = np.array(['tid', 'artist', 'song'])
     # Checks to see db song is in out subset, then adds it
     # Not the most efficient method
+    
     for fil in files:
         for song in songs:
-            if fil.split('/')[-1].split('.')[0] == song:
+            if fil.split('/')[-1].split('.')[0] == song[1].split('/')[-1].split('.')[0]:
                 curFile = getter.open_h5_file_read(fil)
                 tid = fil.split('/')[-1].split('.')[0]
                 curArtist = getter.get_artist_name(curFile)
@@ -23,11 +24,6 @@ def getInfo(files, songs):
 
     return infoList
 
-# Connects song info to topic model info, 
-# forming a larger array to return
-def connectData(songs, topics):
-    return np.hstack([songs[1:,:], topics[:,2:]])
-
 # Saves data to a tsv file, using the given filename and array
 def saveData(fName, dat):
     with open(fName+'.tsv', 'w') as f:
@@ -37,8 +33,7 @@ def saveData(fName, dat):
 def main():
     # Set up stuffs
     dirName = '../db_data/subset/'
-    songs = [x.split('/')[-1].split('.')[0] for x in np.genfromtxt(\
-                        'song_topic_data.txt', dtype=str)[:,1]]
+    songs = np.genfromtxt('song_topic_data.txt', dtype=str)
     files = [dirName + fil for fil in os.listdir(dirName) if fil.endswith('.h5')]
     
     # Get array of song tid, artick, track and save it
