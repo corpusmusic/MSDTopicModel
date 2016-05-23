@@ -13,7 +13,7 @@ def run():
     for track in trackInfo:
         nums = np.array(track[3:], dtype=float)
         order = np.argsort(nums)[::-1]
-        cur = [str(int(x)+1) + '|' + str(nums[int(x)]) for i,x in enumerate(order)]
+        cur = [str(int(x)) + '|' + str(nums[int(x)]) for i,x in enumerate(order)]
         orderedTracks = np.vstack([orderedTracks, np.hstack([track[:3],cur])])
 
     np.savetxt('orderedTopicModel.tsv', orderedTracks, delimiter='\t', fmt="%s")
