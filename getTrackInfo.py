@@ -1,17 +1,21 @@
 #!/usr/bin/env python
-import sys
-sys.path.append('../db_data/')
 import h5py
-import hdf5_getters as getter
 import os
 import numpy as np
+import argparse
+import sys
+
+try:
+    sys.path.append('./PythonSrc/')
+    import hdf5_getters as getter
+except:
+    print 'No PythonSrc Directory Found'
 
 # Gets wanted info about song from db info
-def getInfo(files, songs):
-    infoList = np.array(['tid', 'artist', 'song'])
+def getInfo(files, genres, songs, topicNum):
     # Checks to see db song is in out subset, then adds it
     # Not the most efficient method
-    infoList = np.zeros(18)
+    infoList = np.zeros(topicNum+4)
     for fil in files:
         for song in songs:
             if fil.split('/')[-1].split('.')[0] == song[1].split('/')[-1].split('.')[0]:
@@ -20,10 +24,27 @@ def getInfo(files, songs):
                 curArtist = getter.get_artist_name(curFile)
                 curTitle = getter.get_title(curFile)
                 curArr = np.array([tid, curArtist, curTitle])
-                infoList = np.vstack([infoList, np.hstack([curArr, song[2:]])])
+                infoList = np.vstack([infoList, np.hstack([curArr, genres[tid], song[2:]])])
                 curFile.close()
 
-    return infoList
+    return infoList[1:]
+
+'''
+Create a tsv file which orders how strong each topic is for each song
+File will look like:
+    tid, artist, song, genre*|genre2*, 'most relevant topic model # | number' -> 
+        'least relevant topic model number | number'
+    |genre2 will only appear if applicable
+'''
+def orderInfo(data, topicNum):
+    orderedTracks = np.zeros(topicNum+4).astype(str)
+    for track in data:
+        nums = np.array(track[4:], dtype=float)
+        order = np.argsort(nums)[::-1]
+        cur = [str(int(x)) + '|' + str(nums[int(x)]) for i,x in enumerate(order)]
+        orderedTracks = np.vstack([orderedTracks, np.hstack([track[:4],cur])])
+
+    return orderedTracks[1:]
 
 # Saves data to a tsv file, using the given filename and array
 def saveData(fName, dat):
@@ -33,18 +54,61 @@ def saveData(fName, dat):
 
 def main():
     # Set up stuffs
-    dirName = '../db_data/subset/'
-    songs = np.genfromtxt('song_topic_data.txt', dtype=str)
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--num-topics', dest='topicNum')
+    parser.add_argument('--subset-loc', dest='dirName')
+    parser.add_argument('--song-topics-file', dest='songs')
+    parser.add_argument('--getter-loc', dest='getterLoc')
+    parser.add_argument('--genre-file', dest='genreFile')
+    parser.add_argument('--save-unordered', dest='saveUnordered')
+    args = parser.parse_args()
+
+    if args.topicNum:
+        topicNum = int(args.topicNum)
+    else:
+        print 'Error: num-topics needed'
+        return
+    if args.dirName:
+        dirName = args.dirName
+    else:
+        dirName = '../db_data/subset/'
     files = [dirName + fil for fil in os.listdir(dirName) if fil.endswith('.h5')]
     
+    if args.songs:
+        songs = np.genfromtxt(args.songs, dtype=str)
+    else:
+        songs = np.genfromtxt('song_topic_data.txt', dtype=str)
+
+    if args.getterLoc:
+        sys.path.append(args.getterLoc)
+        import hdf5_getters as getter
+
+    if args.genreFile:
+        genreFile = args.genreFile
+    else:
+        genreFile = '../db_data/msd_tagtraum_cd2.cls'
+
+    genreDict = {}
+    with open(genreFile) as t:
+        genreData = t.readlines()
+        for line in genreData:
+            d = [x.strip('\n') for x in line.split('\t')]
+            vals = '|'.join(d[1:])
+            genreDict[d[0]] = vals
+
+    if args.saveUnordered:
+        saveUnordered = args.saveUnordered
+    else:
+        saveUnordered = False
+
     # Get array of song tid, artick, track and save it
-    infos = getInfo(files, songs)
-    saveData('trackInfo', infos)
-    '''
-    # Open topic model data, combine it to song info and save
-    topicData = np.genfromtxt('song_topic_data.txt', dtype=str)
-    allData = connectData(infos, topicData)
-    saveData('cleanTopicData', allData)
-    '''
+    infos = getInfo(files, genreDict, songs, topicNum)
+    if saveUnordered:
+        saveData('cleanTopicData', infos)
+
+    # Order information by topic relevancy and save it
+    ordered = orderInfo(infos, topicNum)
+    saveData('orderedTopicModel', ordered)
+    
 if __name__=='__main__':
     main()
