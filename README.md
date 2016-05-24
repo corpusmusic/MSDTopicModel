@@ -11,7 +11,7 @@ This repo provides tools to create a tsv file containing TID, artist, song title
 
 ## Running Mallet Topic Modeling
 The code below is the process used to create the topic model information used. The first line adds mallet to the terminal's path. The directory given needs to be edited to where you have mallet saved.
-'''
+```
 # The export line should be adjusted as such:
 export PATH=/Path/To/Mallet/bin:$PATH'
 
@@ -25,4 +25,4 @@ mallet train-topics  --input all_lyrics.mallet --num-topics 25 --output-state to
 # Now that the topic modelling has bee been completed, the data created should be cleaned with the follow line
 # Please note that the number following --num-topics should be the same as the one used in the mallet line above
 python getTrackInfo.py --num-topics 25 --save-unordered True
-'''
+```
