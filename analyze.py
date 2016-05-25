@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 
- import numpy as np
- from scipy.stats import chisquare
- from scipy.stats import itemfreq
+import numpy as np
+from scipy.stats import chisquare
+from scipy.stats import itemfreq
 
 def getGenreTopicis(dat):
     genres = []
@@ -37,12 +37,12 @@ def chi2_test(dat):
                 'Reggae':   5,
                 'Jazz'  :   6,
                 'Rap'   :   7,
-                'Electron': 8,
+                'Electronic': 8,
                 'Punk'  :   9,
                 'RnB'   :   10,
                 'Blues' :   11,
                 'Country':  12,
-                'World' :   13.
+                'World' :   13,
                 'Folk'  :   14,
                 'New Age':  15}
 
@@ -51,7 +51,7 @@ def chi2_test(dat):
     return chi, p
 
 def main():
-    info = np.genfromtxt('orderedTopicModel.csv', delimiter='\t', dtype=str)
+    info = np.genfromtxt('orderedTopicModel.tsv', delimiter='\t', dtype=str)
     genres = []
     topics = []
     for data in info:
