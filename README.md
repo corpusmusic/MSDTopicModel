@@ -27,3 +27,7 @@ mallet train-topics  --input all_lyrics.mallet --num-topics 25 --optimize-interv
 # Please note that the number following --num-topics should be the same as the one used in the mallet line above
 python getTrackInfo.py --num-topics 25 --save-unordered True
 ```
+
+## Results
+Chi² = 315182
+p = 0.0
