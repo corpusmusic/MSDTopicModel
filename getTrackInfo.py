@@ -46,11 +46,21 @@ def orderInfo(data, topicNum):
 
     return orderedTracks[1:]
 
+def createRelationCsv(info):
+    genres = []
+    topics = []
+    for data in info:
+        genres.append(data[3].split('|')[0])
+        topics.append(int(data[4].split('|')[0]))
+
+    return np.vstack([genres, topics]).T
+
 # Saves data to a tsv file, using the given filename and array
 def saveData(fName, dat):
     with open(fName+'.tsv', 'w') as f:
         np.savetxt(f, dat, delimiter='\t', fmt="%s")
     print '%s created' %(fName)
+
 
 def main():
     # Set up stuffs
@@ -109,6 +119,15 @@ def main():
     # Order information by topic relevancy and save it
     ordered = orderInfo(infos, topicNum)
     saveData('orderedTopicModel', ordered)
-    
+
+    yn = raw_input('Create Genre -> Topic csv (y or n): ')
+
+    print yn
+    if yn == 'y':
+        topicRelation = createRelationCsv(ordered)
+        saveData('genreTopicRelation', topicRelation)
+    else:
+        return
+
 if __name__=='__main__':
     main()

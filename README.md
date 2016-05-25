@@ -20,7 +20,8 @@ export PATH=/Path/To/Mallet/bin:$PATH'
 mallet import-dir --input ../db_data/lyrics/ --output all_lyrics.mallet   --keep-sequence --remove-stopwords
 
 # This line runs the topic model and creates output files
-mallet train-topics  --input all_lyrics.mallet --num-topics 25 --output-state topic-state.gz --output-topic-keys lyric_topic_info.txt --output-doc-topics song_topic_data.txt 
+mallet train-topics  --input all_lyrics.mallet --num-topics 25 --optimize-interval 20 --output-state topic-state.gz \
+	--output-topic-keys lyric_topic_info.txt --output-doc-topics song_topic_data.txt 
 
 # Now that the topic modelling has bee been completed, the data created should be cleaned with the follow line
 # Please note that the number following --num-topics should be the same as the one used in the mallet line above
